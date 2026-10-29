@@ -11,24 +11,11 @@ export {
   xtreamAccount,
   xtreamCategories,
   xtreamStreams,
-  buildXtreamM3U,
-} from './xtreamEngine.js';
+  buildXtreamM3U
+} from "./xtreamEngine.js";
 
-export {
-  M3uEntry,
-  M3uPlaylist,
-  CatchupInfo,
-  DrmInfo,
-  parse as parseM3u,
-} from './m3uParser.js';
+export { M3uEntry, M3uPlaylist, CatchupInfo, DrmInfo, parse as parseM3u } from "./m3uParser.js";
 
-export {
-  XmltvChannel,
-  EpgProgram,
-  XmltvResult,
-  parse as parseXmltv,
-} from './xmltvParser.js';
+export { XmltvChannel, EpgProgram, XmltvResult, parse as parseXmltv } from "./xmltvParser.js";
 
-export {
-  CatchupUrlBuilder,
-} from './catchupUrlBuilder.js';
+export { CatchupUrlBuilder } from "./catchupUrlBuilder.js";

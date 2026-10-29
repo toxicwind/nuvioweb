@@ -14,8 +14,17 @@ export class XmltvChannel {
 }
 
 export class EpgProgram {
-  constructor({ startMs, stopMs, title = 'No information', description = null,
-    category = null, episode = null, icon = null, year = null, people = [] } = {}) {
+  constructor({
+    startMs,
+    stopMs,
+    title = "No information",
+    description = null,
+    category = null,
+    episode = null,
+    icon = null,
+    year = null,
+    people = []
+  } = {}) {
     this.startMs = startMs;
     this.stopMs = stopMs;
     this.title = title;
@@ -30,9 +39,9 @@ export class EpgProgram {
 
 export class XmltvResult {
   constructor(channels = {}, programs = {}, error = null, programChannelIds = new Set()) {
-    this.channels = channels;      // Map id -> XmltvChannel
-    this.programs = programs;      // Map id -> EpgProgram[] sorted by startMs
-    this.error = error;            // null or partial-break message
+    this.channels = channels; // Map id -> XmltvChannel
+    this.programs = programs; // Map id -> EpgProgram[] sorted by startMs
+    this.error = error; // null or partial-break message
     this.programChannelIds = programChannelIds;
   }
 }
@@ -49,9 +58,16 @@ function parseTime(value) {
   const mo = parseInt(month, 10);
   const d = parseInt(day, 10);
   if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
-  const ms = Date.UTC(parseInt(year, 10), mo - 1, d, parseInt(hour, 10), parseInt(minute, 10), parseInt(second || '0', 10));
+  const ms = Date.UTC(
+    parseInt(year, 10),
+    mo - 1,
+    d,
+    parseInt(hour, 10),
+    parseInt(minute, 10),
+    parseInt(second || "0", 10)
+  );
   if (offset) {
-    const sign = offset[0] === '-' ? -1 : 1;
+    const sign = offset[0] === "-" ? -1 : 1;
     const oh = parseInt(offset.substring(1, 3), 10) || 0;
     const om = parseInt(offset.substring(3, 5), 10) || 0;
     return ms - sign * (oh * 3600000 + om * 60000);
@@ -69,7 +85,10 @@ function cleanEpisode(raw) {
   if (letters === 0 && digits > 4) return null;
   if (/\d{5,}/.test(t)) return null;
   const s = t.match(/\bS(?:eason)?\s*(\d+)/i);
-  if (s) { const n = parseInt(s[1], 10); if (n >= 100) return null; }
+  if (s) {
+    const n = parseInt(s[1], 10);
+    if (n >= 100) return null;
+  }
   return t;
 }
 
@@ -83,12 +102,15 @@ function yearIn(text) {
 // keepUnlisted: (channelId) => boolean for guides with no channel list.
 // selectChannels: (channels Map) => Set<String> of wanted channel ids.
 // windowStartMs / windowEndMs: time window for programmes.
-export function parse(xmlText, {
-  keepUnlisted = null,
-  selectChannels = () => null,
-  windowStartMs = 0,
-  windowEndMs = Number.MAX_SAFE_INTEGER,
-} = {}) {
+export function parse(
+  xmlText,
+  {
+    keepUnlisted = null,
+    selectChannels = () => null,
+    windowStartMs = 0,
+    windowEndMs = Number.MAX_SAFE_INTEGER
+  } = {}
+) {
   const channels = {};
   const programs = {};
   const programChannelIds = new Set();
@@ -97,44 +119,49 @@ export function parse(xmlText, {
   let doc;
   try {
     const parser = new DOMParser();
-    doc = parser.parseFromString(xmlText, 'application/xml');
+    doc = parser.parseFromString(xmlText, "application/xml");
   } catch (e) {
-    return new XmltvResult({}, {}, `parse failed: ${String(e.message || e).slice(0, 140)}`, programChannelIds);
+    return new XmltvResult(
+      {},
+      {},
+      `parse failed: ${String(e.message || e).slice(0, 140)}`,
+      programChannelIds
+    );
   }
 
   // Forgiving: if document is malformed, DOMParser may still return partial.
   const root = doc.documentElement;
-  if (!root || root.tagName !== 'tv') {
-    return new XmltvResult({}, {}, 'no tv root element', programChannelIds);
+  if (!root || root.tagName !== "tv") {
+    return new XmltvResult({}, {}, "no tv root element", programChannelIds);
   }
 
   // Parse parsererror node if DOMParser surfaced one (still keeps partial)
-  const perr = root.querySelector ? root.querySelector('parsererror') : null;
+  const perr = root.querySelector ? root.querySelector("parsererror") : null;
   if (perr) {
-    error = 'partial parse: ' + (perr.textContent || '').slice(0, 140);
+    error = "partial parse: " + (perr.textContent || "").slice(0, 140);
   }
 
-  const channelEls = root.querySelectorAll ? root.querySelectorAll('channel') : [];
+  const channelEls = root.querySelectorAll ? root.querySelectorAll("channel") : [];
   for (const el of channelEls) {
-    const id = el.getAttribute('id');
+    const id = el.getAttribute("id");
     if (!id) continue;
     const names = [];
-    const nameEls = el.querySelectorAll ? el.querySelectorAll('display-name') : [];
+    const nameEls = el.querySelectorAll ? el.querySelectorAll("display-name") : [];
     for (const ne of nameEls) {
-      const t = (ne.textContent || '').trim();
+      const t = (ne.textContent || "").trim();
       if (t) names.push(t);
     }
-    const iconEl = el.querySelector ? el.querySelector('icon') : null;
-    const icon = iconEl ? iconEl.getAttribute('src') : null;
+    const iconEl = el.querySelector ? el.querySelector("icon") : null;
+    const icon = iconEl ? iconEl.getAttribute("src") : null;
     channels[id] = new XmltvChannel(id, names, icon);
   }
 
   const wanted = selectChannels(channels);
   const wantedResolved = wanted !== null;
 
-  const programmeEls = root.querySelectorAll ? root.querySelectorAll('programme') : [];
+  const programmeEls = root.querySelectorAll ? root.querySelectorAll("programme") : [];
   for (const el of programmeEls) {
-    const channelId = el.getAttribute('channel');
+    const channelId = el.getAttribute("channel");
     if (channelId) programChannelIds.add(channelId);
 
     let keep;
@@ -146,64 +173,71 @@ export function parse(xmlText, {
 
     if (!keep) continue;
 
-    const start = parseTime(el.getAttribute('start'));
-    const stop = parseTime(el.getAttribute('stop'));
+    const start = parseTime(el.getAttribute("start"));
+    const stop = parseTime(el.getAttribute("stop"));
     if (start == null || stop == null || stop <= windowStartMs || start >= windowEndMs) continue;
 
     // read first occurrence of each child (Kotlin semantics)
-    let title = null, subTitle = null, desc = null, category = null, episode = null;
-    let icon = null, date = null, people = [];
+    let title = null,
+      subTitle = null,
+      desc = null,
+      category = null,
+      episode = null;
+    let icon = null,
+      date = null,
+      people = [];
 
     const children = el.children || el.childNodes || [];
     for (const ch of children) {
       if (ch.nodeType !== 1) continue;
       const name = ch.tagName;
-      if (name === 'title' && title == null) title = (ch.textContent || '').trim();
-      else if (name === 'sub-title' && subTitle == null) subTitle = (ch.textContent || '').trim();
-      else if (name === 'desc' && desc == null) desc = (ch.textContent || '').trim();
-      else if (name === 'category' && category == null) category = (ch.textContent || '').trim();
-      else if (name === 'icon' && icon == null) icon = ch.getAttribute('src');
-      else if (name === 'date' && date == null) date = (ch.textContent || '').trim();
-      else if (name === 'episode-num') {
-        const system = ch.getAttribute('system');
-        const t = (ch.textContent || '').trim();
-        if (system === 'xmltv_ns' || episode == null) {
+      if (name === "title" && title == null) title = (ch.textContent || "").trim();
+      else if (name === "sub-title" && subTitle == null) subTitle = (ch.textContent || "").trim();
+      else if (name === "desc" && desc == null) desc = (ch.textContent || "").trim();
+      else if (name === "category" && category == null) category = (ch.textContent || "").trim();
+      else if (name === "icon" && icon == null) icon = ch.getAttribute("src");
+      else if (name === "date" && date == null) date = (ch.textContent || "").trim();
+      else if (name === "episode-num") {
+        const system = ch.getAttribute("system");
+        const t = (ch.textContent || "").trim();
+        if (system === "xmltv_ns" || episode == null) {
           episode = formatEpisode(system, t);
         }
-      } else if (name === 'credits') {
-        const credEls = ch.querySelectorAll ? ch.querySelectorAll('actor, director') : [];
+      } else if (name === "credits") {
+        const credEls = ch.querySelectorAll ? ch.querySelectorAll("actor, director") : [];
         for (const ce of credEls) {
-          const t = (ce.textContent || '').trim();
+          const t = (ce.textContent || "").trim();
           if (t) people.push(t);
         }
       }
     }
 
     const ep = cleanEpisode(episode);
-    const year = (date && date.trim().length === 4)
-      ? (parseInt(date.trim(), 10) || null)
-      : (yearIn(title) || yearIn(desc));
+    const year =
+      date && date.trim().length === 4
+        ? parseInt(date.trim(), 10) || null
+        : yearIn(title) || yearIn(desc);
     if (year && (year < 1900 || year > 2100)) year = null;
 
     const fullDescParts = [];
     if (subTitle) fullDescParts.push(subTitle);
     if (desc) fullDescParts.push(desc);
-    let fullDesc = fullDescParts.join('\n') || null;
-    if (fullDesc && fullDesc.length > 800) fullDesc = fullDesc.slice(0, 800).trimEnd() + '…';
+    let fullDesc = fullDescParts.join("\n") || null;
+    if (fullDesc && fullDesc.length > 800) fullDesc = fullDesc.slice(0, 800).trimEnd() + "…";
 
-    const progTitle = (title || 'No information').trim();
+    const progTitle = (title || "No information").trim();
     const safeTitle = progTitle.length <= 80 ? progTitle : progTitle;
 
     const prog = new EpgProgram({
       startMs: start,
       stopMs: stop,
-      title: safeTitle || 'No information',
+      title: safeTitle || "No information",
       description: fullDesc,
       category: category ? category.trim() : null,
       episode: ep,
       icon,
       year,
-      people: people.slice(0, 12),
+      people: people.slice(0, 12)
     });
 
     if (!programs[channelId]) programs[channelId] = [];
@@ -219,18 +253,18 @@ export function parse(xmlText, {
 }
 
 function formatEpisode(system, raw) {
-  const text = (raw || '').trim();
+  const text = (raw || "").trim();
   if (!text) return null;
-  if (system === 'xmltv_ns') {
-    const parts = text.split('.');
-    const season = parts[0] ? parseInt(parts[0].split('/')[0].trim(), 10) : null;
-    const ep = parts[1] ? parseInt(parts[1].split('/')[0].trim(), 10) : null;
+  if (system === "xmltv_ns") {
+    const parts = text.split(".");
+    const season = parts[0] ? parseInt(parts[0].split("/")[0].trim(), 10) : null;
+    const ep = parts[1] ? parseInt(parts[1].split("/")[0].trim(), 10) : null;
     if (season != null && season >= 100) return null;
     if (season != null && ep != null) return `S${season + 1} E${ep + 1}`;
     if (ep != null) return `E${ep + 1}`;
     return null;
   }
-  if (system != null && system !== 'onscreen') return null;
+  if (system != null && system !== "onscreen") return null;
   return cleanEpisode(text);
 }
 
