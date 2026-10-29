@@ -213,7 +213,7 @@ export function parse(
     }
 
     const ep = cleanEpisode(episode);
-    const year =
+    let year =
       date && date.trim().length === 4
         ? parseInt(date.trim(), 10) || null
         : yearIn(title) || yearIn(desc);
