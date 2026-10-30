@@ -3,6 +3,10 @@ import { MediaServerSyncService } from "./core/profile/mediaServerSyncService.js
 import { installCustomPosterFallback } from "./core/poster/customPoster.js";
 import { installWebOsImgurImageFallback } from "./core/media/imageProxy.js";
 import { AmbientMode } from "./ui/ambient/ambientMode.js";
+import "./data/xtream"; // lg-fleet: ported NuvioTV Xtream/EPG/catch-up engine
+import { XTREAM_ACTIONS } from "./data/xtream";
+const XTREAM = { ...XTREAM_ACTIONS };
+if (typeof window !== "undefined") window.__NUVIO_XTREAM__ = XTREAM;
 /* global __NUVIO_APP_VERSION__ */
 
 import "./core/diagnostics/consoleDebugBuffer.js";
