@@ -29,6 +29,8 @@
     "sync:webos": "node ./scripts/sync-wrapper.mjs --webos"
   },
   "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "bun-types": "^1.4.4",
     "@csstools/postcss-global-data": "^4.0.0",
     "@eslint/js": "^9.39.4",
     "@webos-tools/cli": "^3.2.6",
