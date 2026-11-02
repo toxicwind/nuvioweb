@@ -1,18 +1,23 @@
 # Nuvio/webOS lineage — main head + satellite map (2026-11-02, tau max-plan 5.23)
 
-**Verdict: `nuviotv-webos` (`NuvioWeb`, app id `space.nuvio.webos`, v1.2.10) is
-the WORKING fork and the main head for webOS.** It already carries the merged
-NuvioTV Xtream/EPG/catch-up engine that the merge phase wanted.
+**Verdict (2026-11-02 evening, reconciled with tau-maximal-audit ground
+truth): the WORKING fork / main head is `nuvio-default`** — the TV is ALIVE
+(webOS 4.4.84, hbchannel/inputhook) and its installed bundle (Nov 1 04:48-05:07
+update, modern esbuild from the nuvio-default dev-server pipeline) matches
+`nuvio-default/webos-app/appinfo.json` (id `space.nuvio.webos`, v1.2.10,
+vendor "Nuvio Media"). `nuviotv-webos` remains the merged-engine reference fork
+and carries the NuvioTV Xtream/EPG/catch-up engine; treat it as the engine
+LINEAGE source, not the deployed artifact.
 
 ## Main head
 
-| Field       | Value                                                             |
-| ----------- | ----------------------------------------------------------------- |
-| Product dir | `pens/ranch/products/nuviotv-webos`                               |
-| Remote      | `github.com/toxicwind/NuvioWeb.git`                               |
-| appinfo     | `space.nuvio.webos`, version 1.2.10, type `web`                   |
-| HEAD        | `cadd294f` (merge of origin/main)                                 |
-| Engine      | Ported NuvioTV Xtream (M3U/XMLTV/catch-up) merged into webOS main |
+| Field       | Value                                                                    |
+| ----------- | ------------------------------------------------------------------------ |
+| Product dir | `pens/ranch/products/nuvio-default` (deployed; engine lineage here)      |
+| Remote      | `github.com/toxicwind/nuvio-webos-lg.git`                                |
+| appinfo     | `space.nuvio.webos`, version 1.2.10, type `web`                          |
+| Evidence    | TV alive (webOS 4.4.84); installed bundle matches appinfo (Nov 1 update) |
+| Engine ref  | `nuviotv-webos` carries the ported NuvioTV Xtream (M3U/XMLTV/catch-up)   |
 
 ## Satellite forks (NOT heads)
 
