@@ -39,3 +39,27 @@ NuvioTV Xtream/EPG/catch-up engine that the merge phase wanted.
   architect** — not a code task. The webOS head keeps `space.nuvio.webos`.
 - Phase 5.25 merge tail: `IPTV-BRIDGE` addon + any surviving fork feature not in
   `ca8f556f` — audit diff against main before merging (weave/suture), lose nothing.
+
+## Phase 5.25 merge verdict (2026-11-02) — ALREADY COMPLETE, no tail
+
+Audited the main head (`nuviotv-webos`, `space.nuvio.webos` v1.2.10) against
+every fork feature source:
+
+- **Xtream/EPG/catch-up** — resident (`js/data/xtream/` 5 files:
+  xtreamEngine, m3uParser, xmltvParser, catchupUrlBuilder, index) + merged set.
+- **Subtitles** — main has a 218+ file native stack (ASS renderer, SRT/VTT
+  sniffing, bitmap subtitle decoder with WASM, AVPlay/Luna track selection) —
+  SUPERSET of kerloys' `src/services/subtitles` (srtToVtt/vttParser). No port.
+- **Streams/debrid/p2p/party/trakt/tmdb/cloud/sync** — main services surface
+  far richer than any fork.
+- **kerloys-iptv-webos** — React/Vite UI shell (`com.kerloy.iptv_1.0.0_all.ipk`);
+  its data services (epg/m3u/search) duplicate main; only the UI framework is
+  distinct, and merging a second UI stack into the vanilla-JS app would create
+  a dual-architecture mess. No merge — documented as superseded.
+- **IPTV-BRIDGE** (`ip-stream-addon`) — Stremio/Nuvio ADDON BACKEND (src/api,
+  src/iptv, src/tmdb), not TV-app UI. Complementary server component; stays a
+  standalone repo and is consumed via the app's addon surface, not merged.
+
+**Nothing to weave/suture.** Main head carries every fork feature as a superset.
+The remaining work is not code — it is product naming (Phase 5.24, architect's
+decision) and on-TV verification (Phase 5.35: ares-cli deploy + Pixel UI check).
