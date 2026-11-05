@@ -4,6 +4,12 @@ const TORBOX_BASE_URL = "https://api.torbox.app/";
 const PREMIUMIZE_BASE_URL = "https://www.premiumize.me/";
 const REAL_DEBRID_BASE_URL = "https://api.real-debrid.com/rest/1.0/";
 
+// Direct fetch fallback timeout. The debrid proxy only covers a subset of
+// paths (requestdl/mylist); createtorrent/checkcached fall through to a raw
+// fetch that previously had NO timeout — a hung TorBox/Premiumize response
+// blocked the resolve forever (readyState 0, "src isn't loading").
+const DEBRID_DIRECT_FETCH_TIMEOUT_MS = 22000;
+
 function joinUrl(baseUrl, path) {
   return `${String(baseUrl || "").replace(/\/+$/, "")}/${String(path || "").replace(/^\/+/, "")}`;
 }
@@ -19,7 +25,11 @@ async function requestJson(baseUrl, path, options = {}) {
       }
     };
     response =
-      (await fetchViaWebOsDebridAuthProxy(url, fetchOptions)) || (await fetch(url, fetchOptions));
+      (await fetchViaWebOsDebridAuthProxy(url, fetchOptions)) ||
+      (await fetch(url, {
+        ...fetchOptions,
+        signal: AbortSignal.timeout(DEBRID_DIRECT_FETCH_TIMEOUT_MS)
+      }));
   } catch (error) {
     return {
       ok: false,
@@ -54,7 +64,11 @@ async function requestDebridAuthJson(baseUrl, path, options = {}) {
   };
   try {
     const response =
-      (await fetchViaWebOsDebridAuthProxy(url, fetchOptions)) || (await fetch(url, fetchOptions));
+      (await fetchViaWebOsDebridAuthProxy(url, fetchOptions)) ||
+      (await fetch(url, {
+        ...fetchOptions,
+        signal: AbortSignal.timeout(DEBRID_DIRECT_FETCH_TIMEOUT_MS)
+      }));
     const text = await response.text();
     let data = null;
     if (text.trim()) {
